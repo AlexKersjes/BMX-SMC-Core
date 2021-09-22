@@ -1,0 +1,61 @@
+stages:
+  - build_before_test
+  - test
+  - build_release
+
+csharp-build-and-test-windows64:
+  script: 
+    - git checkout .
+    - cd .\src\SMCLib
+    - '&"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\MSBuild.exe" .\SMCLib.sln /m /t:restore /low'
+    - '&"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\MSBuild.exe" .\SMCLib.sln /m /t:Rebuild /low /p:Configuration=Debug /p:Runtimeidentifier=x86'
+    - '&"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE\Extensions\TestPlatform\vstest.console.exe"  /Parallel ".\SMC Unit Tests\bin\Debug\SMC Unit Tests.dll"'
+  stage: build_before_test
+  tags:
+    - csharp
+  artifacts:
+    paths:
+      - ./src/SMCLib/*/bin
+# FIXME: unity unit tests and builds are a bit broken at the moment.
+
+#unity-unit-test:
+#  script: 
+#    - git checkout .
+#    - '&"C:\Program Files\Unity\Hub\Editor\2020.3.6f1\Editor\Unity.exe"  -batchmode  -projectPath ./src/SMC/  -runTests  -testPlatform editmode  -logFile  -testResults ./unit-tests.xml'
+#    - python ./src/SMC/Assets/Scripts/Tests/parseTest.py ./src/SMC/unit-tests.xml
+#  stage: test
+#  tags:
+#    - unity
+#  dependencies:
+#    - csharp-build-and-test-windows64
+#  artifacts:
+#    paths: 
+#        - ./src/SMC/unit-tests.xml
+
+#unity-build-windows64:
+#  script: 
+#    - git checkout .
+#    - '&"C:\Program Files\Unity\Hub\Editor\2019.4.21f1\Editor\Unity.exe" -quit -batchmode -projectPath ./src/SMC/ -executeMethod BuildCommand.BuildWin64'
+#    - python ./src/SMC/Assets/Scripts/Tests/waitForFile.py ./src/SMC/Build/StandaloneWindows64/SMC.exe
+#  stage: build_release
+#  tags:
+#    - unity
+#  dependencies:
+#    - csharp-build-and-test-windows64
+#  artifacts:
+#    paths:
+#      - ./src/SMC/Build/
+
+# unity-build-android:
+#   script:
+#       - git checkout .
+#       - '&"C:\Program Files\Unity\Hub\Editor\2019.4.21f1\Editor\Unity.exe" -quit -batchmode -projectPath ./src/SMC/ -executeMethod BuildCommand.BuildAndroid'
+#       - python ./src/SMC/Assets/Scripts/Tests/waitForFile.py ./src/SMC/Build/Android/SMC.apk
+#   stage: build_release
+#   tags:
+#     - unity
+#  dependencies:
+#    - csharp-build-and-test-windows64
+#   artifacts:
+#     paths:
+#       - ./src/SMC/Build/
