@@ -118,8 +118,8 @@ namespace SMCUserInterface
 
         private void btnSaveFile_Click(object sender, EventArgs e)
         {
-            // TODO
-            MessageBox.Show("File saving has not been implemented yet");
+            // TODO;
+            
         }
 
         private void clbTags_ItemCheck(object sender, ItemCheckEventArgs e)
