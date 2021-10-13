@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace SMC_Core
 {
@@ -194,5 +196,7 @@ namespace SMC_Core
         {
             return Convert.ToString(streamInstance.GetStreamerID());
         }
+
+        public Vector3 GetOffset() { return calibrationOffset; }
     }
 }
