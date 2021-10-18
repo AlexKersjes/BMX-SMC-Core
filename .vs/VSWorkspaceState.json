@@ -3,9 +3,7 @@
     "",
     "\\src",
     "\\src\\SMC",
-    "\\src\\SMCLib",
-    "\\src\\SMCLib\\SMCLib"
+    "\\src\\SMCLib"
   ],
-  "SelectedNode": "\\src\\SMCLib\\SMCLib\\Form1.Designer.cs",
   "PreviewInSolutionExplorer": false
 }

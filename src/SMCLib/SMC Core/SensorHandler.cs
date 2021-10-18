@@ -93,6 +93,6 @@ namespace SMC_Core
             Sensors.ForEach(s => s.updateData());
         }
 
-
+        public List<Sensor> GetSensors() { return Sensors; }
     }
 }

@@ -119,7 +119,10 @@ namespace SMCUserInterface
         private void btnSaveFile_Click(object sender, EventArgs e)
         {
             // TODO;
-            
+            var sensorList = sensorHandler.GetSensors();
+            var casted = new List<PozyxSensor>();
+            sensorList.ForEach(delegate (Sensor y) { casted.Add((PozyxSensor)y); });
+            new SMCLib.Saver(0, casted).Save();
         }
 
         private void clbTags_ItemCheck(object sender, ItemCheckEventArgs e)

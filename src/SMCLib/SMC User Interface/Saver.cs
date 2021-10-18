@@ -57,7 +57,7 @@ namespace SMCLib
                 {
                     run.sensors.Add(ConvertSensor(s));
                 } ) ;
-            string JSONstring = JsonSerializer.Serialize(run);
+            string JSONstring = JsonSerializer.Serialize(run, new JsonSerializerOptions { IncludeFields = true }) ;
             return JSONstring;
         }
 
