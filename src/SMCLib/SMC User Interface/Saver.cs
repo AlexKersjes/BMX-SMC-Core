@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Text.Json;
 using System.Numerics;
 using System.Text.Json.Serialization;
 using System.IO;
+using Newtonsoft.Json.Bson;
+using Newtonsoft.Json;
 
 namespace SMCLib
 {
@@ -20,63 +21,68 @@ namespace SMCLib
             this.RiderID = RiderID;
         }
 
-        class RunData
+        public class RunData
         {
-            public int RiderID;
-            public DateTime EndOfRunTimestamp;
-            public List<SensorData> sensors;
+            public int RiderID { get; set; }
+            public DateTime EndOfRunUTC { get; set; }
+            public List<SensorData> Sensors { get; set; }
         }
 
-        struct SensorData
+        public struct SensorData
         {
-            public int id;
-            public Vector3 CalibrationOffset;
-
-            public List<DataPoint> points;
+            public int Id { get; set; }
+            public Vector3 ClbrOffset { get; set; }
+            public List<DataPoint> Points { get; set; }
         }
 
-        struct DataPoint
+        public struct DataPoint
         {
-            public float confidenceScore;
-            public List<Vector3> accelerometer;
-            public Vector3 coordinates;
-            public float hardwareTimestamp;
-            public long systemTimestamp;
-            public float speed;
+            public float Confidence { get; set; }
+            public List<Vector3> Accelerometer { get; set; }
+            public Vector3 Coordinates { get; set; }
+            public float HardwareTime { get; set; }
+            public long SystemTime { get; set; }
+            public float Speed { get; set; }
         }
 
-        public string Jsonify(DateTime ts)
+        public string Bsonify(DateTime ts)
         {
             var run = new RunData
             {
                 RiderID = this.RiderID,
-                EndOfRunTimestamp = ts,
-                sensors = new List<SensorData> { },
+                EndOfRunUTC = ts.ToUniversalTime(),
+                Sensors = new List<SensorData> { },
             };
             this.Sensors.ForEach(delegate (SMC_Core.PozyxSensor s) 
                 {
-                    run.sensors.Add(ConvertSensor(s));
+                    run.Sensors.Add(ConvertSensor(s));
                 } ) ;
-            string JSONstring = JsonSerializer.Serialize(run, new JsonSerializerOptions { IncludeFields = true }) ;
-            return JSONstring;
+            using (MemoryStream ms = new MemoryStream())
+            using (BsonDataWriter datawriter = new BsonDataWriter(ms))
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                serializer.Serialize(datawriter, run);
+                return Convert.ToBase64String(ms.ToArray());
+            }
         }
 
         private SensorData ConvertSensor (SMC_Core.PozyxSensor input)
         {
-            SensorData list = new SensorData() { points = new List<DataPoint>(), id = input.GetID() };
+            SensorData list = new SensorData() { Points = new List<DataPoint>(), Id = input.GetID() };
             var ls = input.getAllPozyxData().ToList();
             ls.ForEach(delegate (SMC_Core.PozyxData p) 
             {
-                list.points.Add(new DataPoint
+                list.Points.Add(new DataPoint
                 {
-                    hardwareTimestamp = p.hardwareTimestamp,
-                    systemTimestamp = p.systemTimestamp,
-                    accelerometer = p.accelerometer,
-                    coordinates = p.coordinates,
-                    confidenceScore = p.score,
-                    speed = p.speed
+                    HardwareTime = p.hardwareTimestamp,
+                    SystemTime = p.systemTimestamp,
+                    Accelerometer = p.accelerometer,
+                    Coordinates = p.coordinates,
+                    Confidence = p.score,
+                    Speed = p.speed
                 });
             });
+            list.Points.OrderBy(p => p.HardwareTime);
             return list;
         }
 
@@ -84,8 +90,8 @@ namespace SMCLib
         public void Save()
         {
             DateTime now = DateTime.Now;
-            string filename = RiderID + "$" + now.ToString("yyyyMMddTHHmmss")+".json";
-            File.WriteAllText(filename, Jsonify(now));
+            string filename = RiderID + "$" + now.ToString("yyyyMMddTHHmmss")+".bson";
+            File.WriteAllText(filename, Bsonify(now));
             this.Sensors.ForEach(delegate (SMC_Core.PozyxSensor s) { s.clearData(); });
         }
 
