@@ -125,7 +125,7 @@
             this.tbServer.Name = "tbServer";
             this.tbServer.Size = new System.Drawing.Size(100, 20);
             this.tbServer.TabIndex = 6;
-            this.tbServer.Text = "broker.hivemq.com";
+            this.tbServer.Text = "localhost";
             // 
             // tbUsername
             // 
@@ -167,7 +167,7 @@
             this.tbTopic.Name = "tbTopic";
             this.tbTopic.Size = new System.Drawing.Size(100, 20);
             this.tbTopic.TabIndex = 8;
-            this.tbTopic.Text = "smctestdata/tags";
+            this.tbTopic.Text = "testing";
             // 
             // label1
             // 
